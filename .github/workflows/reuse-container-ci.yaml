@@ -129,6 +129,8 @@ jobs:
     needs: [setup-scan]
     if: ${{ !inputs.no_build && github.event_name == 'pull_request' }}
     runs-on: ${{ github.repository_owner == 'intel' && 'intel-ubuntu-latest' || 'ubuntu-latest' }}
+    env:
+      GROUP_DIR: ${{ inputs.group_dir }}
     strategy:
       matrix:
         container: ${{ fromJSON(needs.setup-scan.outputs.matrix) }}
@@ -144,29 +146,25 @@ jobs:
         registry: ${{ secrets.REGISTRY }}
         username: ${{ secrets.REGISTRY_USER }}
         password: ${{ secrets.REGISTRY_TOKEN }}
+    - name: Downcase Group Dir
+      run: echo "group_dir=${GROUP_DIR,,}" >> ${GITHUB_ENV}
     - name: Pull Image
-      run: docker pull ${{ secrets.REGISTRY }}/${GROUP_DIR,,}:${{ matrix.container }}
+      run: docker pull ${{ secrets.REGISTRY }}/${{ env.group_dir }}}:${{ matrix.container }}
       env:
         GROUP_DIR: ${{ inputs.group_dir }}
     - name: Scan Container
       uses: intel/ai-containers/.github/scan@main
       with:
-        image-ref: ${{ secrets.REGISTRY }}/${GROUP_DIR,,}:${{ matrix.container }}
-        output: ${{ matrix.container }}-${GROUP_DIR,,}-scan.sarif
-      env:
-        GROUP_DIR: ${{ inputs.group_dir }}
+        image-ref: ${{ secrets.REGISTRY }}/${{ env.group_dir }}:${{ matrix.container }}
+        output: ${{ matrix.container }}-${{ env.group_dir }}-scan.sarif
     - name: Cleanup
       if: always()
       run: docker rmi -f ${{ secrets.REGISTRY }}/${GROUP_DIR,,}:${{ matrix.container }}
-      env:
-        GROUP_DIR: ${{ inputs.group_dir }}
     - uses: github/codeql-action/upload-sarif@b611370bb5703a7efb587f9d136a52ea24c5c38c # v3.25.11
       with:
         sarif_file: '${{ matrix.container }}-${GROUP_DIR,,}-scan.sarif'
         category: '${{ matrix.container }}'
       continue-on-error: true
-      env:
-        GROUP_DIR: ${{ inputs.group_dir }}
       ####################################################################################################
       # Generic Test Runner
       ####################################################################################################
