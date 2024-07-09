@@ -11,4 +11,4 @@ services:
         no_proxy: ""
       context: ./docker
       dockerfile: Dockerfile
-    image: ${REGISTRY:-opea}/${REPO:-audioqna}:${GITHUB_RUN_NUMBER:-latest}
+    image: ${REGISTRY:-opea}/audioqna:${GITHUB_RUN_NUMBER:-latest}
