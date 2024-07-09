@@ -4,4 +4,5 @@
 # https://github.com/intel/ai-containers/tree/main/test-runner
 import-comps:
   img: ${REGISTRY}/docsum:${GITHUB_RUN_NUMBER:-0}
-  cmd: -h
+  cmd: -c "from comps import DocSumGateway, MicroService, ServiceOrchestrator, ServiceType"
+  entrypoint: "python"
