@@ -11,13 +11,13 @@ services:
         no_proxy: ""
       context: ./docker
       dockerfile: Dockerfile
-    image: ${REGISTRY:-opea}/${REPO:-chatqna}:${GITHUB_RUN_NUMBER:-latest}
+    image: ${REGISTRY:-opea}/chatqna:${GITHUB_RUN_NUMBER:-latest}
   ui:
     build:
       context: ./docker/ui
       dockerfile: ./docker/Dockerfile
     extends: chatqna
-    image: ${REGISTRY:-opea}/${REPO:-chatqna-ui}:${GITHUB_RUN_NUMBER:-latest}
+    image: ${REGISTRY:-opea}/chatqna-ui:${GITHUB_RUN_NUMBER:-latest}
   conversation-ui:
     build:
       args:
@@ -27,4 +27,4 @@ services:
       context: ./docker/ui
       dockerfile: ./docker/Dockerfile.react
     extends: chatqna
-    image: ${REGISTRY:-opea}/${REPO:-chatqna-conversation-ui}:${GITHUB_RUN_NUMBER:-latest}
+    image: ${REGISTRY:-opea}/chatqna-conversation-ui:${GITHUB_RUN_NUMBER:-latest}
