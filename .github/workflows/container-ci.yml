@@ -65,7 +65,7 @@ jobs:
         group: ${{ fromJson(needs.group-diff.outputs.groups) }}
         experimental: [true]
       fail-fast: false
-    uses: opea/genaiexamples/.github/workflows/bpst-containers.yaml@main
+    uses: tylertitsworth/genaiexamples/.github/workflows/bpst-containers.yaml@main
     with:
       group_dir: ${{ matrix.group }}
     secrets: inherit
