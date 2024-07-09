@@ -1,0 +1,7 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# https://github.com/intel/ai-containers/tree/main/test-runner
+import-comps:
+  img: ${REGISTRY}/${REPO}:${GITHUB_RUN_NUMBER:-0}
+  cmd: python -c "from comps import AudioQnAGateway, MicroService, ServiceOrchestrator, ServiceType"
