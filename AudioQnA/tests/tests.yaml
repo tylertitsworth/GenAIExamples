@@ -3,6 +3,3 @@
 
 # https://github.com/intel/ai-containers/tree/main/test-runner
 #test
-import-comps:
-  img: ${REGISTRY}/audioqna:${GITHUB_RUN_NUMBER:-0}
-  cmd: -h
