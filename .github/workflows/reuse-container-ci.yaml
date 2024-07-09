@@ -165,6 +165,8 @@ jobs:
         sarif_file: '${{ matrix.container }}-${GROUP_DIR,,}-scan.sarif'
         category: '${{ matrix.container }}'
       continue-on-error: true
+      env:
+        GROUP_DIR: ${{ inputs.group_dir }}
       ####################################################################################################
       # Generic Test Runner
       ####################################################################################################
