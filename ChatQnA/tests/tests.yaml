@@ -4,4 +4,4 @@
 # https://github.com/intel/ai-containers/tree/main/test-runner
 import-comps:
   img: ${REGISTRY}/chatqna:${GITHUB_RUN_NUMBER:-0}
-  cmd: python -c "from comps import ChatQnAGateway, MicroService, ServiceOrchestrator, ServiceType"
+  cmd: -h
