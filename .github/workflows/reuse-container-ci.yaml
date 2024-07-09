@@ -149,7 +149,7 @@ jobs:
     - name: Downcase Group Dir
       run: echo "group_dir=${GROUP_DIR,,}" >> ${GITHUB_ENV}
     - name: Pull Image
-      run: docker pull ${{ secrets.REGISTRY }}/${{ env.group_dir }}}:${{ matrix.container }}
+      run: docker pull ${{ secrets.REGISTRY }}/${{ env.group_dir }}:${{ matrix.container }}
       env:
         GROUP_DIR: ${{ inputs.group_dir }}
     - name: Scan Container
