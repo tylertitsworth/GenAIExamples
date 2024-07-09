@@ -65,7 +65,7 @@ jobs:
         group: ${{ fromJson(needs.group-diff.outputs.groups) }}
         experimental: [true]
       fail-fast: false
-    uses: opea/genaiexamples/.github/workflows/bpst-containers.yaml@main
+    uses: opea/genaiexamples/.github/workflows/reuse-container-ci.yaml@main
     with:
       group_dir: ${{ matrix.group }}
       no_start: true
