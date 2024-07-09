@@ -97,20 +97,20 @@ docker build --no-cache -t opea/dataprep-redis:latest --build-arg https_proxy=$h
 cd ..
 ```
 
-### 6. Build MegaService Docker Image
+### 6. Build MegaService Docker Images
 
-To construct the Mega Service, we utilize the [GenAIComps](https://github.com/opea-project/GenAIComps.git) microservice pipeline within the `chatqna.py` Python script. Build MegaService Docker image via below command:
+To construct the Mega Service, we utilize the [GenAIComps](https://github.com/opea-project/GenAIComps.git) microservice pipeline within the `chatqna.py` Python script. Build MegaService Docker images via below command:
 
 ```bash
 git clone https://github.com/opea-project/GenAIExamples.git
 cd GenAIExamples/ChatQnA
-docker compose build chatqna ui
+docker compose build chatqna chatqna-ui
 ```
 
 Alternatively, you can build the ChatQnA Conversational UI image:
 
 ```bash
-HOST_IP=<your-public-ip> docker compose build chatqna conversation-ui
+HOST_IP=<your-public-ip> docker compose build chatqna chatqna-conversation-ui
 ```
 
 Then run the command `docker images`, you will have the following 7 Docker Images:

@@ -12,13 +12,13 @@ services:
       context: ./docker
       dockerfile: Dockerfile
     image: ${REGISTRY:-opea}/chatqna:${GITHUB_RUN_NUMBER:-latest}
-  ui:
+  chatqna-ui:
     build:
       context: ./docker/ui
       dockerfile: ./docker/Dockerfile
     extends: chatqna
     image: ${REGISTRY:-opea}/chatqna-ui:${GITHUB_RUN_NUMBER:-latest}
-  conversation-ui:
+  chatqna-conversation-ui:
     build:
       args:
         BACKEND_SERVING_ENDPOINT: "http://${HOST_IP:-127.0.0.1}:8888/v1/chatqna"
