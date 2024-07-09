@@ -145,7 +145,7 @@ jobs:
         username: ${{ secrets.REGISTRY_USER }}
         password: ${{ secrets.REGISTRY_TOKEN }}
     - name: Pull Image
-      run: docker pull ${{ secrets.REGISTRY }}/${{ secrets.REPO }}:${{ matrix.container }}
+      run: docker pull ${{ secrets.REGISTRY }}/${{ inputs.group_dir }}:${{ matrix.container }}
     - name: Scan Container
       uses: intel/ai-containers/.github/scan@main
       with:
@@ -179,7 +179,7 @@ jobs:
   test-containers:
     needs: [setup-build, setup-test]
     if: ${{ needs.setup-test.outputs.matrix != '[]' }}
-    runs-on: [self-hosted, Linux, "${{ inputs.runner_label || fromJson(needs.setup-build.outputs.matrix).runner_label }}"]
+    runs-on: fromJson(needs.setup-build.outputs.matrix).runner_label }}
     strategy:
       matrix:
         tests: ${{ fromJson(needs.setup-test.outputs.matrix) }}
