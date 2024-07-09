@@ -50,4 +50,5 @@ jobs:
     uses: tylertitsworth/genaiexamples/.github/workflows/bpst-containers.yaml@main
     with:
       group_dir: ${{ matrix.group }}
+      no_start: true
     secrets: inherit

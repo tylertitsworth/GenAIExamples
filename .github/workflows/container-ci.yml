@@ -68,6 +68,7 @@ jobs:
     uses: tylertitsworth/genaiexamples/.github/workflows/bpst-containers.yaml@main
     with:
       group_dir: ${{ matrix.group }}
+      no_start: true
     secrets: inherit
   status-check:
     needs: [group-diff, pipeline-ci]
