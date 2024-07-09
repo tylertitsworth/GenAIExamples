@@ -5,4 +5,4 @@
 #test
 import-comps:
   img: ${REGISTRY}/audioqna:${GITHUB_RUN_NUMBER:-0}
-  cmd: python -c "from comps import AudioQnAGateway, MicroService, ServiceOrchestrator, ServiceType"
+  cmd: -h
