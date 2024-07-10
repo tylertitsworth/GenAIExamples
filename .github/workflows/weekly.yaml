@@ -49,7 +49,7 @@ jobs:
         group: ${{ fromJson(needs.get-groups.outputs.groups) }}
         experimental: [true]
       fail-fast: false
-    uses: opea/genaiexamples/.github/workflows/reuse-container-ci.yaml@main
+    uses: tylertitsworth/genaiexamples/.github/workflows/reuse-container-ci.yaml@main
     with:
       group_dir: ${{ matrix.group }}
     secrets: inherit
