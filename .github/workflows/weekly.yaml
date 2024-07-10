@@ -17,6 +17,8 @@ on:
   schedule:
   - cron: "0 0 * * 0"
   workflow_dispatch: null
+  push:
+    tags: ['**'] # whenever a tag is created/modified
 permissions: read-all
 jobs:
   get-groups:
@@ -50,5 +52,4 @@ jobs:
     uses: tylertitsworth/genaiexamples/.github/workflows/reuse-container-ci.yaml@main
     with:
       group_dir: ${{ matrix.group }}
-      no_start: true
     secrets: inherit
