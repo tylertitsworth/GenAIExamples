@@ -127,23 +127,20 @@ function get_gmc_controller_logs() {
     kubectl logs $pod_name -n $SYSTEM_NAMESPACE
 }
 
-if [ $# -eq 0 ]; then
-    echo "Usage: $0 <function_name>"
-    exit 1
-fi
-
-case "$1" in
-    install_ChatQnA)
-        pushd ChatQnA/kubernetes
-        install_chatqna
-        popd
-        ;;
-    validate_ChatQnA)
-        pushd ChatQnA/kubernetes
+function main() {
+    WORKDIR="$PWD"
+    cd $WORKDIR/ChatQnA/kubernetes/manifests
+    init_chatqna
+    kubectl create ns $NAMESPACE
+    install_chatqna
+    if kubectl rollout status deployment --namespace "$NAMESPACE" --timeout "$ROLLOUT_TIMEOUT_SECONDS"; then
+        echo "Rollout completed successfully"
+        sleep 60
+        cd $WORKDIR
+        SERVICE_NAME=chaqna-xeon-backend-server-svc
         validate_chatqna
-        popd
-        ;;
-    *)
-        echo "Unknown function: $1"
-        ;;
-esac
+    else
+        echo "Rollout failed"
+        exit 1
+    fi
+}

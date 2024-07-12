@@ -83,29 +83,20 @@ function validate_chatqna() {
     fi
 }
 
-if [ $# -eq 0 ]; then
-    echo "Usage: $0 <function_name>"
-    exit 1
-fi
-
-case "$1" in
-    init_ChatQnA)
-        pushd ChatQnA/kubernetes/manifests
-        init_chatqna
-        popd
-        ;;
-    install_ChatQnA)
-        pushd ChatQnA/kubernetes/manifests
-        NAMESPACE=$2
-        install_chatqna
-        popd
-        ;;
-    validate_ChatQnA)
-        NAMESPACE=$2
+function main() {
+    WORKDIR="$PWD"
+    cd $WORKDIR/ChatQnA/kubernetes/manifests
+    init_chatqna
+    kubectl create ns $NAMESPACE
+    install_chatqna
+    if kubectl rollout status deployment --namespace "$NAMESPACE" --timeout "$ROLLOUT_TIMEOUT_SECONDS"; then
+        echo "Rollout completed successfully"
+        sleep 60
+        cd $WORKDIR
         SERVICE_NAME=chaqna-xeon-backend-server-svc
         validate_chatqna
-        ;;
-    *)
-        echo "Unknown function: $1"
-        ;;
-esac
+    else
+        echo "Rollout failed"
+        exit 1
+    fi
+}
