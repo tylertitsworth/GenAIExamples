@@ -143,27 +143,20 @@ jobs:
       run: bash ${{ matrix.tests.test }}.sh
       env:
         REGISTRY: ${{ secrets.REGISTRY }}
-  test-k8s:
-    needs: [setup-test]
-    if: ${{ needs.setup-test.outputs.k8s-matrix != '[]' && fromJSON(inputs.test) }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        tests: ${{ fromJson(needs.setup-test.outputs.k8s-matrix) }}
-        experimental: [true]
-      fail-fast: false
-    steps:
-    - uses: step-security/harden-runner@17d0e2bd7d51742c71671bd19fa12bdc9d40a3d6 # v2.8.1
-      with:
-        egress-policy: audit
-    - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-    - name: Run Test
-      run: |
-        echo "Running Kubernetes tests"
+        IMAGE_REPO: $OPEA_IMAGE_REPO
+        IMAGE_TAG: $GITHUB_RUN_NUMBER
+        APP_NAMESPACE: $lower_example-$date
+        ROLLOUT_TIMEOUT_SECONDS: 1800s
+        KUBECTL_TIMEOUT_SECONDS: 60s
     - name: Cleanup
-      if: always()
+      if: always() && ${{ contains(matrix.tests.test, "gmc") || contains(matrix.tests.test, "manifest") }}
       run: |
-        echo "Cleaning up Kubernetes tests"
+        if ! kubectl delete namespace $APP_NAMESPACE --timeout=$KUBECTL_TIMEOUT_SECONDS; then
+          kubectl delete pods --namespace $NAMESPACE --force --grace-period=0 --all
+          kubectl delete ns $NAMESPACE --force --grace-period=0 --timeout=$KUBECTL_TIMEOUT_SECONDS
+        fi
+      env:
+        KUBECTL_TIMEOUT_SECONDS: 60s
 ####################################################################################################
 # Publish
 ####################################################################################################
