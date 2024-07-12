@@ -145,13 +145,13 @@ jobs:
         REGISTRY: ${{ secrets.REGISTRY }}
         IMAGE_REPO: $OPEA_IMAGE_REPO
         IMAGE_TAG: $GITHUB_RUN_NUMBER
-        APP_NAMESPACE: $lower_example-$date
+        NAMESPACE: $lower_example-$date
         ROLLOUT_TIMEOUT_SECONDS: 1800s
         KUBECTL_TIMEOUT_SECONDS: 60s
     - name: Cleanup
       if: always() && ${{ contains(matrix.tests.test, "gmc") || contains(matrix.tests.test, "manifest") }}
       run: |
-        if ! kubectl delete namespace $APP_NAMESPACE --timeout=$KUBECTL_TIMEOUT_SECONDS; then
+        if ! kubectl delete namespace $NAMESPACE --timeout=$KUBECTL_TIMEOUT_SECONDS; then
           kubectl delete pods --namespace $NAMESPACE --force --grace-period=0 --all
           kubectl delete ns $NAMESPACE --force --grace-period=0 --timeout=$KUBECTL_TIMEOUT_SECONDS
         fi
