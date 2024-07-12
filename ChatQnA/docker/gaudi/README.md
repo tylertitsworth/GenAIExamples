@@ -54,40 +54,18 @@ docker build --no-cache -f Dockerfile-hpu -t opea/tei-gaudi:latest .
 cd ../..
 ```
 
-### 8. Build MegaService Docker Image
+### 8. Build MegaService Docker Images
 
-To construct the Mega Service, we utilize the [GenAIComps](https://github.com/opea-project/GenAIComps.git) microservice pipeline within the `chatqna.py` Python script. Build the MegaService Docker image using the command below:
+To construct the Mega Service, we utilize the [GenAIComps](https://github.com/opea-project/GenAIComps.git) microservice pipeline within the `chatqna.py` Python script. Build the MegaService Docker images using the command below:
 
 ```bash
 git clone https://github.com/opea-project/GenAIExamples.git
-cd GenAIExamples/ChatQnA/docker
-docker build --no-cache -t opea/chatqna:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f Dockerfile .
-cd ../../..
+cd GenAIExamples/ChatQnA
+docker compose build
 ```
 
-### 9. Build UI Docker Image
-
-Construct the frontend Docker image using the command below:
-
-```bash
-cd GenAIExamples/ChatQnA/docker/ui/
-docker build --no-cache -t opea/chatqna-ui:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f ./docker/Dockerfile .
-cd ../../../..
-```
-
-### 10. Build Conversational React UI Docker Image (Optional)
-
-Build frontend Docker image that enables Conversational experience with ChatQnA megaservice via below command:
-
-**Export the value of the public IP address of your Gaudi node to the `host_ip` environment variable**
-
-```bash
-cd GenAIExamples/ChatQnA/docker/ui/
-export BACKEND_SERVICE_ENDPOINT="http://${host_ip}:8888/v1/chatqna"
-export DATAPREP_SERVICE_ENDPOINT="http://${host_ip}:6007/v1/dataprep"
-docker build --no-cache -t opea/chatqna-conversation-ui:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg BACKEND_SERVICE_ENDPOINT=$BACKEND_SERVICE_ENDPOINT --build-arg DATAPREP_SERVICE_ENDPOINT=$DATAPREP_SERVICE_ENDPOINT -f ./docker/Dockerfile.react .
-cd ../../../..
-```
+> [!TIP]
+> Export the value of the public IP address of your Xeon server to best utilize the `conversation-ui` image with `export HOST_IP=<your-ip>`
 
 Then run the command `docker images`, you will have the following 8 Docker Images:
 
@@ -99,9 +77,6 @@ Then run the command `docker images`, you will have the following 8 Docker Image
 6. `opea/dataprep-redis:latest`
 7. `opea/chatqna:latest`
 8. `opea/chatqna-ui:latest`
-
-If Conversation React UI is built, you will find one more image:
-
 9. `opea/chatqna-conversation-ui:latest`
 
 ## 🚀 Start MicroServices and MegaService
@@ -117,24 +92,24 @@ export https_proxy=${your_http_proxy}
 export EMBEDDING_MODEL_ID="BAAI/bge-base-en-v1.5"
 export RERANK_MODEL_ID="BAAI/bge-reranker-base"
 export LLM_MODEL_ID="Intel/neural-chat-7b-v3-3"
-export TEI_EMBEDDING_ENDPOINT="http://${host_ip}:8090"
-export TEI_RERANKING_ENDPOINT="http://${host_ip}:8808"
-export TGI_LLM_ENDPOINT="http://${host_ip}:8008"
-export REDIS_URL="redis://${host_ip}:6379"
+export TEI_EMBEDDING_ENDPOINT="http://${HOST_IP}:8090"
+export TEI_RERANKING_ENDPOINT="http://${HOST_IP}:8808"
+export TGI_LLM_ENDPOINT="http://${HOST_IP}:8008"
+export REDIS_URL="redis://${HOST_IP}:6379"
 export INDEX_NAME="rag-redis"
 export HUGGINGFACEHUB_API_TOKEN=${your_hf_api_token}
-export MEGA_SERVICE_HOST_IP=${host_ip}
-export EMBEDDING_SERVICE_HOST_IP=${host_ip}
-export RETRIEVER_SERVICE_HOST_IP=${host_ip}
-export RERANK_SERVICE_HOST_IP=${host_ip}
-export LLM_SERVICE_HOST_IP=${host_ip}
-export BACKEND_SERVICE_ENDPOINT="http://${host_ip}:8888/v1/chatqna"
-export DATAPREP_SERVICE_ENDPOINT="http://${host_ip}:6007/v1/dataprep"
-export DATAPREP_GET_FILE_ENDPOINT="http://${host_ip}:6008/v1/dataprep/get_file"
-export DATAPREP_DELETE_FILE_ENDPOINT="http://${host_ip}:6009/v1/dataprep/delete_file"
+export MEGA_SERVICE_HOST_IP=${HOST_IP}
+export EMBEDDING_SERVICE_HOST_IP=${HOST_IP}
+export RETRIEVER_SERVICE_HOST_IP=${HOST_IP}
+export RERANK_SERVICE_HOST_IP=${HOST_IP}
+export LLM_SERVICE_HOST_IP=${HOST_IP}
+export BACKEND_SERVICE_ENDPOINT="http://${HOST_IP}:8888/v1/chatqna"
+export DATAPREP_SERVICE_ENDPOINT="http://${HOST_IP}:6007/v1/dataprep"
+export DATAPREP_GET_FILE_ENDPOINT="http://${HOST_IP}:6008/v1/dataprep/get_file"
+export DATAPREP_DELETE_FILE_ENDPOINT="http://${HOST_IP}:6009/v1/dataprep/delete_file"
 ```
 
-Note: Please replace with `host_ip` with you external IP address, do **NOT** use localhost.
+Note: Please replace with `HOST_IP` with you external IP address, do **NOT** use localhost.
 
 ### Start all the services Docker Containers
 
@@ -151,7 +126,7 @@ For validation details, please refer to [how-to-validate_service](./how_to_valid
 1. TEI Embedding Service
 
 ```bash
-curl ${host_ip}:8090/embed \
+curl ${HOST_IP}:8090/embed \
     -X POST \
     -d '{"inputs":"What is Deep Learning?"}' \
     -H 'Content-Type: application/json'
@@ -160,7 +135,7 @@ curl ${host_ip}:8090/embed \
 2. Embedding Microservice
 
 ```bash
-curl http://${host_ip}:6000/v1/embeddings \
+curl http://${HOST_IP}:6000/v1/embeddings \
   -X POST \
   -d '{"text":"hello"}' \
   -H 'Content-Type: application/json'
@@ -176,7 +151,7 @@ Check the vecotor dimension of your embedding model, set `your_embedding` dimens
 
 ```bash
 your_embedding=$(python -c "import random; embedding = [random.uniform(-1, 1) for _ in range(768)]; print(embedding)")
-curl http://${host_ip}:7000/v1/retrieval \
+curl http://${HOST_IP}:7000/v1/retrieval \
   -X POST \
   -d "{\"text\":\"test\",\"embedding\":${your_embedding}}" \
   -H 'Content-Type: application/json'
@@ -185,7 +160,7 @@ curl http://${host_ip}:7000/v1/retrieval \
 4. TEI Reranking Service
 
 ```bash
-curl http://${host_ip}:8808/rerank \
+curl http://${HOST_IP}:8808/rerank \
     -X POST \
     -d '{"query":"What is Deep Learning?", "texts": ["Deep Learning is not...", "Deep learning is..."]}' \
     -H 'Content-Type: application/json'
@@ -194,7 +169,7 @@ curl http://${host_ip}:8808/rerank \
 5. Reranking Microservice
 
 ```bash
-curl http://${host_ip}:8000/v1/reranking \
+curl http://${HOST_IP}:8000/v1/reranking \
   -X POST \
   -d '{"initial_query":"What is Deep Learning?", "retrieved_docs": [{"text":"Deep Learning is not..."}, {"text":"Deep learning is..."}]}' \
   -H 'Content-Type: application/json'
@@ -203,7 +178,7 @@ curl http://${host_ip}:8000/v1/reranking \
 6. TGI Service
 
 ```bash
-curl http://${host_ip}:8008/generate \
+curl http://${HOST_IP}:8008/generate \
   -X POST \
   -d '{"inputs":"What is Deep Learning?","parameters":{"max_new_tokens":64, "do_sample": true}}' \
   -H 'Content-Type: application/json'
@@ -212,7 +187,7 @@ curl http://${host_ip}:8008/generate \
 7. LLM Microservice
 
 ```bash
-curl http://${host_ip}:9000/v1/chat/completions \
+curl http://${HOST_IP}:9000/v1/chat/completions \
   -X POST \
   -d '{"query":"What is Deep Learning?","max_new_tokens":17,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
   -H 'Content-Type: application/json'
@@ -221,7 +196,7 @@ curl http://${host_ip}:9000/v1/chat/completions \
 8. MegaService
 
 ```bash
-curl http://${host_ip}:8888/v1/chatqna -H "Content-Type: application/json" -d '{
+curl http://${HOST_IP}:8888/v1/chatqna -H "Content-Type: application/json" -d '{
      "messages": "What is the revenue of Nike in 2023?"
      }'
 ```
@@ -233,7 +208,7 @@ If you want to update the default knowledge base, you can use the following comm
 Update Knowledge Base via Local File Upload:
 
 ```bash
-curl -X POST "http://${host_ip}:6007/v1/dataprep" \
+curl -X POST "http://${HOST_IP}:6007/v1/dataprep" \
      -H "Content-Type: multipart/form-data" \
      -F "files=@./nke-10k-2023.pdf"
 ```
@@ -243,7 +218,7 @@ This command updates a knowledge base by uploading a local file for processing. 
 Add Knowledge Base via HTTP Links:
 
 ```bash
-curl -X POST "http://${host_ip}:6007/v1/dataprep" \
+curl -X POST "http://${HOST_IP}:6007/v1/dataprep" \
      -H "Content-Type: multipart/form-data" \
      -F 'link_list=["https://opea.dev"]'
 ```
@@ -253,7 +228,7 @@ This command updates a knowledge base by submitting a list of HTTP links for pro
 Also, you are able to get the file/link list that you uploaded:
 
 ```bash
-curl -X POST "http://${host_ip}:6008/v1/dataprep/get_file" \
+curl -X POST "http://${HOST_IP}:6008/v1/dataprep/get_file" \
      -H "Content-Type: application/json"
 ```
 
@@ -261,17 +236,17 @@ To delete the file/link you uploaded:
 
 ```bash
 # delete link
-curl -X POST "http://${host_ip}:6009/v1/dataprep/delete_file" \
+curl -X POST "http://${HOST_IP}:6009/v1/dataprep/delete_file" \
      -d '{"file_path": "https://opea.dev"}' \
      -H "Content-Type: application/json"
 
 # delete file
-curl -X POST "http://${host_ip}:6009/v1/dataprep/delete_file" \
+curl -X POST "http://${HOST_IP}:6009/v1/dataprep/delete_file" \
      -d '{"file_path": "nke-10k-2023.pdf"}' \
      -H "Content-Type: application/json"
 
 # delete all uploaded files and links
-curl -X POST "http://${host_ip}:6009/v1/dataprep/delete_file" \
+curl -X POST "http://${HOST_IP}:6009/v1/dataprep/delete_file" \
      -d '{"file_path": "all"}' \
      -H "Content-Type: application/json"
 ```
@@ -297,7 +272,7 @@ export LANGCHAIN_API_KEY=ls_...
 
 ## 🚀 Launch the UI
 
-To access the frontend, open the following URL in your browser: http://{host_ip}:5173. By default, the UI runs on port 5173 internally. If you prefer to use a different host port to access the frontend, you can modify the port mapping in the `docker_compose.yaml` file as shown below:
+To access the frontend, open the following URL in your browser: http://{HOST_IP}:5173. By default, the UI runs on port 5173 internally. If you prefer to use a different host port to access the frontend, you can modify the port mapping in the `docker_compose.yaml` file as shown below:
 
 ```yaml
   chaqna-gaudi-ui-server:
@@ -333,7 +308,7 @@ chaqna-gaudi-conversation-ui-server:
   restart: always
 ```
 
-Once the services are up, open the following URL in your browser: http://{host_ip}:5174. By default, the UI runs on port 80 internally. If you prefer to use a different host port to access the frontend, you can modify the port mapping in the `docker_compose.yaml` file as shown below:
+Once the services are up, open the following URL in your browser: http://{HOST_IP}:5174. By default, the UI runs on port 80 internally. If you prefer to use a different host port to access the frontend, you can modify the port mapping in the `docker_compose.yaml` file as shown below:
 
 ```yaml
   chaqna-gaudi-conversation-ui-server:

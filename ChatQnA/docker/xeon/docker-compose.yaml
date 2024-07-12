@@ -190,7 +190,7 @@ services:
     ipc: host
     restart: always
   chaqna-xeon-conversation-ui-server:
-    image: opea/chatqna-conversation-ui:latest
+    image: ${REGISTRY:-opea}/chatqna-conversation-ui:${GITHUB_RUN_NUMBER:-latest}
     container_name: chatqna-xeon-conversation-ui-server
     environment:
       - no_proxy=${no_proxy}

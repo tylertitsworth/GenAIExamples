@@ -74,16 +74,6 @@ Then run the command `docker images`, you will have the following 7 Docker Image
 
 Since the `docker_compose.yaml` will consume some environment variables, you need to setup them in advance as below.
 
-**Export the value of the public IP address of your AIPC to the `host_ip` environment variable**
-
-> Change the External_Public_IP below with the actual IPV4 value
-
-```
-export host_ip="External_Public_IP"
-```
-
-For Linux users, please run `hostname -I | awk '{print $1}'`. For Windows users, please run `ipconfig | findstr /i "IPv4"` to get the external public ip.
-
 **Export the value of your Huggingface API token to the `your_hf_api_token` environment variable**
 
 > Change the Your_Huggingface_API_Token below with tyour actual Huggingface API Token value
@@ -104,25 +94,25 @@ export http_proxy=${your_http_proxy}
 export https_proxy=${your_http_proxy}
 export EMBEDDING_MODEL_ID="BAAI/bge-base-en-v1.5"
 export RERANK_MODEL_ID="BAAI/bge-reranker-base"
-export TEI_EMBEDDING_ENDPOINT="http://${host_ip}:6006"
-export TEI_RERANKING_ENDPOINT="http://${host_ip}:8808"
-export REDIS_URL="redis://${host_ip}:6379"
+export TEI_EMBEDDING_ENDPOINT="http://${HOST_IP}:6006"
+export TEI_RERANKING_ENDPOINT="http://${HOST_IP}:8808"
+export REDIS_URL="redis://${HOST_IP}:6379"
 export INDEX_NAME="rag-redis"
 export HUGGINGFACEHUB_API_TOKEN=${your_hf_api_token}
-export MEGA_SERVICE_HOST_IP=${host_ip}
-export EMBEDDING_SERVICE_HOST_IP=${host_ip}
-export RETRIEVER_SERVICE_HOST_IP=${host_ip}
-export RERANK_SERVICE_HOST_IP=${host_ip}
-export LLM_SERVICE_HOST_IP=${host_ip}
-export BACKEND_SERVICE_ENDPOINT="http://${host_ip}:8888/v1/chatqna"
-export DATAPREP_SERVICE_ENDPOINT="http://${host_ip}:6007/v1/dataprep"
+export MEGA_SERVICE_HOST_IP=${HOST_IP}
+export EMBEDDING_SERVICE_HOST_IP=${HOST_IP}
+export RETRIEVER_SERVICE_HOST_IP=${HOST_IP}
+export RERANK_SERVICE_HOST_IP=${HOST_IP}
+export LLM_SERVICE_HOST_IP=${HOST_IP}
+export BACKEND_SERVICE_ENDPOINT="http://${HOST_IP}:8888/v1/chatqna"
+export DATAPREP_SERVICE_ENDPOINT="http://${HOST_IP}:6007/v1/dataprep"
 
-export OLLAMA_ENDPOINT=http://${host_ip}:11434
-# On Windows PC, please use host.docker.internal instead of ${host_ip}
+export OLLAMA_ENDPOINT=http://${HOST_IP}:11434
+# On Windows PC, please use host.docker.internal instead of ${HOST_IP}
 #export OLLAMA_ENDPOINT=http://host.docker.internal:11434
 ```
 
-Note: Please replace with `host_ip` with you external IP address, do not use localhost.
+Note: Please replace with `HOST_IP` with you external IP address, do not use localhost.
 
 ### Start all the services Docker Containers
 
@@ -141,7 +131,7 @@ ollama run llama3
 1. TEI Embedding Service
 
 ```bash
-curl ${host_ip}:6006/embed \
+curl ${HOST_IP}:6006/embed \
     -X POST \
     -d '{"inputs":"What is Deep Learning?"}' \
     -H 'Content-Type: application/json'
@@ -150,7 +140,7 @@ curl ${host_ip}:6006/embed \
 2. Embedding Microservice
 
 ```bash
-curl http://${host_ip}:6000/v1/embeddings\
+curl http://${HOST_IP}:6000/v1/embeddings\
   -X POST \
   -d '{"text":"hello"}' \
   -H 'Content-Type: application/json'
@@ -161,7 +151,7 @@ curl http://${host_ip}:6000/v1/embeddings\
 
 ```bash
 your_embedding=$(python3 -c "import random; embedding = [random.uniform(-1, 1) for _ in range(768)]; print(embedding)")
-curl http://${host_ip}:7000/v1/retrieval \
+curl http://${HOST_IP}:7000/v1/retrieval \
   -X POST \
   -d '{"text":"What is the revenue of Nike in 2023?","embedding":"'"${your_embedding}"'"}' \
   -H 'Content-Type: application/json'
@@ -170,7 +160,7 @@ curl http://${host_ip}:7000/v1/retrieval \
 4. TEI Reranking Service
 
 ```bash
-curl http://${host_ip}:8808/rerank \
+curl http://${HOST_IP}:8808/rerank \
     -X POST \
     -d '{"query":"What is Deep Learning?", "texts": ["Deep Learning is not...", "Deep learning is..."]}' \
     -H 'Content-Type: application/json'
@@ -179,7 +169,7 @@ curl http://${host_ip}:8808/rerank \
 5. Reranking Microservice
 
 ```bash
-curl http://${host_ip}:8000/v1/reranking\
+curl http://${HOST_IP}:8000/v1/reranking\
   -X POST \
   -d '{"initial_query":"What is Deep Learning?", "retrieved_docs": [{"text":"Deep Learning is not..."}, {"text":"Deep learning is..."}]}' \
   -H 'Content-Type: application/json'
@@ -188,13 +178,13 @@ curl http://${host_ip}:8000/v1/reranking\
 6. Ollama Service
 
 ```bash
-curl http://${host_ip}:11434/api/generate -d '{"model": "llama3", "prompt":"What is Deep Learning?"}'
+curl http://${HOST_IP}:11434/api/generate -d '{"model": "llama3", "prompt":"What is Deep Learning?"}'
 ```
 
 7. LLM Microservice
 
 ```bash
-curl http://${host_ip}:9000/v1/chat/completions\
+curl http://${HOST_IP}:9000/v1/chat/completions\
   -X POST \
   -d '{"query":"What is Deep Learning?","max_new_tokens":17,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
   -H 'Content-Type: application/json'
@@ -203,7 +193,7 @@ curl http://${host_ip}:9000/v1/chat/completions\
 8. MegaService
 
 ```bash
-curl http://${host_ip}:8888/v1/chatqna -H "Content-Type: application/json" -d '{
+curl http://${HOST_IP}:8888/v1/chatqna -H "Content-Type: application/json" -d '{
      "messages": "What is the revenue of Nike in 2023?"
      }'
 ```
@@ -215,7 +205,7 @@ If you want to update the default knowledge base, you can use the following comm
 Update Knowledge Base via Local File Upload:
 
 ```bash
-curl -X POST "http://${host_ip}:6007/v1/dataprep" \
+curl -X POST "http://${HOST_IP}:6007/v1/dataprep" \
      -H "Content-Type: multipart/form-data" \
      -F "files=@./nke-10k-2023.pdf"
 ```
@@ -225,7 +215,7 @@ This command updates a knowledge base by uploading a local file for processing. 
 Add Knowledge Base via HTTP Links:
 
 ```bash
-curl -X POST "http://${host_ip}:6007/v1/dataprep" \
+curl -X POST "http://${HOST_IP}:6007/v1/dataprep" \
      -H "Content-Type: multipart/form-data" \
      -F 'link_list=["https://opea.dev"]'
 ```
@@ -234,4 +224,4 @@ This command updates a knowledge base by submitting a list of HTTP links for pro
 
 ## 🚀 Launch the UI
 
-To access the frontend, open the following URL in your browser: http://{host_ip}:5173.
+To access the frontend, open the following URL in your browser: http://{HOST_IP}:5173.

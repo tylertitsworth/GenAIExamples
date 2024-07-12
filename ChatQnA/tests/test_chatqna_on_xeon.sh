@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 set -e
-echo "IMAGE_REPO=${IMAGE_REPO}"
 
 WORKPATH=$(dirname "$PWD")
 LOG_PATH="$WORKPATH/tests"
@@ -11,20 +10,7 @@ ip_address=$(hostname -I | awk '{print $1}')
 
 function build_docker_images() {
     cd $WORKPATH
-    git clone https://github.com/opea-project/GenAIComps.git
-    cd GenAIComps
-
-    docker build -t opea/embedding-tei:latest -f comps/embeddings/langchain/docker/Dockerfile .
-    docker build -t opea/retriever-redis:latest -f comps/retrievers/langchain/redis/docker/Dockerfile .
-    docker build -t opea/reranking-tei:latest -f comps/reranks/tei/docker/Dockerfile .
-    docker build -t opea/llm-tgi:latest -f comps/llms/text-generation/tgi/Dockerfile .
-    docker build -t opea/dataprep-redis:latest -f comps/dataprep/redis/langchain/docker/Dockerfile .
-
-    cd $WORKPATH/docker
-    docker build --no-cache -t opea/chatqna:latest -f Dockerfile .
-
-    cd $WORKPATH/docker/ui
-    docker build --no-cache -t opea/chatqna-ui:latest -f docker/Dockerfile .
+    docker compose build
 
     docker images
 }
@@ -51,17 +37,8 @@ function start_services() {
 
     sed -i "s/backend_address/$ip_address/g" $WORKPATH/docker/ui/svelte/.env
 
-    if [[ "$IMAGE_REPO" != "" ]]; then
-        # Replace the container name with a test-specific name
-        echo "using image repository $IMAGE_REPO and image tag $IMAGE_TAG"
-        sed -i "s#image: opea/chatqna:latest#image: opea/chatqna:${IMAGE_TAG}#g" docker_compose.yaml
-        sed -i "s#image: opea/chatqna-ui:latest#image: opea/chatqna-ui:${IMAGE_TAG}#g" docker_compose.yaml
-        sed -i "s#image: opea/chatqna-conversation-ui:latest#image: opea/chatqna-conversation-ui:${IMAGE_TAG}#g" docker_compose.yaml
-        sed -i "s#image: opea/*#image: ${IMAGE_REPO}opea/#g" docker_compose.yaml
-    fi
-
     # Start Docker Containers
-    docker compose -f docker_compose.yaml up -d
+    docker compose up -d
     n=0
     until [[ "$n" -ge 200 ]]; do
         docker logs tgi-service > tgi_service_start.log
@@ -201,19 +178,8 @@ function validate_frontend() {
     fi
 }
 
-function stop_docker() {
-    cd $WORKPATH/docker/xeon
-    container_list=$(cat docker_compose.yaml | grep container_name | cut -d':' -f2)
-    for container_name in $container_list; do
-        cid=$(docker ps -aq --filter "name=$container_name")
-        if [[ ! -z "$cid" ]]; then docker stop $cid && docker rm $cid && sleep 1s; fi
-    done
-}
-
 function main() {
 
-    stop_docker
-    if [[ "$IMAGE_REPO" == "" ]]; then build_docker_images; fi
     start_time=$(date +%s)
     start_services
     end_time=$(date +%s)
@@ -224,9 +190,9 @@ function main() {
     validate_megaservice
     validate_frontend
 
-    stop_docker
+    cd $WORKPATH
+    docker compose down
     echo y | docker system prune
-
 }
 
 main
